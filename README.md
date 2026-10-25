@@ -1,14 +1,16 @@
 # mise-jasypt
 
-A [mise](https://mise.jdx.dev/) tool plugin for the [Jasypt CLI](https://github.com/rahogata/jasypt).
+A [mise](https://mise.jdx.dev/) tool plugin for the archived [Jasypt CLI](https://github.com/rahogata/jasypt).
 
-This plugin automatically discovers published Jasypt release versions from the upstream GitHub releases, downloads the matching distribution archive, verifies its SHA-256 checksum, and exposes the `jasypt` command through mise.
+Important: the upstream Jasypt project is archived, and this plugin is intentionally scoped to the last supported release, Jasypt 1.9.3. It is not intended to track newer upstream releases or versions beyond 1.9.3.
+
+This plugin automatically discovers the supported Jasypt 1.9.3 release, downloads the matching distribution archive, verifies its SHA-256 checksum, and exposes the CLI through `mise`.
 
 ## Features
 
 - Installs Jasypt CLI via mise
-- Discovers upstream release versions from `rahogata/jasypt`
-- Validates release asset checksums
+- Supports the archived upstream Jasypt 1.9.3 release only
+- Validates the release asset checksum
 - Exposes a `jasypt` wrapper with commonly used commands
 - Works across supported platforms through the upstream distribution archive
 
@@ -20,18 +22,18 @@ Install the plugin:
 mise plugin install jasypt https://github.com/rahogata/mise-jasypt.git
 ```
 
-Then install a version:
+Then install the supported version:
 
 ```bash
-mise install jasypt@latest
+mise install jasypt@1.9.3
 ```
 
 Or set it in a project or globally:
 
 ```bash
-mise use -g jasypt@latest
+mise use -g jasypt@1.9.3
 # or
-mise use jasypt@latest
+mise use jasypt@1.9.3
 ```
 
 ## Usage
@@ -49,19 +51,9 @@ jasypt list-algorithms
 
 ## Available versions
 
-Versions are discovered from the upstream `rahogata/jasypt` GitHub releases using tag names like:
+This plugin intentionally supports only the upstream Jasypt 1.9.3 release.
 
-```text
-jasypt-1.9.3
-jasypt-2.0.0
-```
-
-The plugin matches those tags and maps them to mise versions like:
-
-```text
-1.9.3
-2.0.0
-```
+Because the upstream project has been archived, newer release tags are not supported by this plugin and are intentionally excluded from version discovery.
 
 ## Development
 
@@ -84,7 +76,7 @@ mise run ci
 
 ## Notes
 
-The plugin wraps the upstream Jasypt distribution and exposes the CLI through `mise` so you can manage multiple versions cleanly in the same environment.
+The plugin wraps the upstream Jasypt 1.9.3 distribution and exposes the CLI through `mise` so you can manage the supported version cleanly in the same environment.
 
 ## License
 
