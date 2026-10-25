@@ -56,7 +56,7 @@ end
 
 function M.get_install_info(version)
     local release = M.get_release(version)
-    local asset_name = "jasypt-" .. version .. "-dist.zip"
+    local asset_name = "jasypt-" .. version .. "-dist.tar.gz"
     local checksum_name = asset_name .. ".sha256"
 
     local asset_url

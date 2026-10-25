@@ -2,18 +2,20 @@
 #MISE description="Run plugin tests - install and execute tool"
 set -euo pipefail
 
+jasypt_version="1.9.3"
+
 mise plugin link --force jasypt .
 mise cache clear
 mise ls-remote --minimum-release-age 0s jasypt
-mise install jasypt@1.9.3
+mise install "jasypt@$jasypt_version"
 
 # Capture and display the output while also verifying it
-output=$(mise exec "jasypt@1.9.3" -- "jasypt" --version)
+output=$(mise exec "jasypt@$jasypt_version" -- "jasypt" --version)
 echo "jasypt output: $output"
 
-if echo "$output" | grep -q 'jasypt@1.0.0'; then
+if echo "$output" | grep -q "jasypt@$jasypt_version"; then
     echo "✓ Tests passed"
 else
-    echo "✗ Test failed: expected version jasypt@1.0.0"
+    echo "✗ Test failed: expected version jasypt@$jasypt_version"
     exit 1
 fi

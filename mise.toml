@@ -24,3 +24,13 @@ run = "hk fix"
 [tasks.ci]
 description = "Run all CI checks"
 depends = ["lint", "test"]
+
+[tasks.build-docker]
+description = "Build docker image"
+dir = "docker"
+run = "podman compose build"
+
+[tasks.cl]
+description = "Login to the container"
+dir = "docker"
+run = "podman compose run --rm mise"
