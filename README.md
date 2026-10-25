@@ -2,15 +2,13 @@
 
 A [mise](https://mise.jdx.dev/) tool plugin for the [Jasypt CLI](https://github.com/rahogata/jasypt).
 
-This project packages the Jasypt CLI from the maintained fork at `rahogata/jasypt`, which is the source used for the plugin’s published artifacts and version metadata. The plugin is intentionally scoped to the Jasypt 1.9.3 release line and does not aim to track newer upstream or forked versions.
-
-This plugin automatically discovers the supported Jasypt 1.9.3 release from the forked upstream releases, downloads the matching distribution archive, verifies its SHA-256 checksum, and exposes the CLI through `mise`.
+This project packages the Jasypt CLI from the maintained fork at `rahogata/jasypt`, which is the source used for the plugin's published artifacts and version metadata. The plugin discovers stable release tags from that fork, downloads the matching distribution archive, verifies its SHA-256 checksum, and exposes the CLI through `mise`.
 
 ## Features
 
 - Installs Jasypt CLI via mise
 - Discovers versions from the `rahogata/jasypt` fork
-- Supports the Jasypt 1.9.3 release line only
+- Supports published stable Jasypt release tags from that fork
 - Validates the release asset checksum
 - Exposes a `jasypt` wrapper with commonly used commands
 - Works across supported platforms through the upstream distribution archive
@@ -23,7 +21,7 @@ Install the plugin:
 mise plugin install jasypt https://github.com/rahogata/mise-jasypt.git
 ```
 
-Then install the supported version:
+Then install a published version, for example:
 
 ```bash
 mise install jasypt@1.9.3
@@ -52,9 +50,7 @@ jasypt list-algorithms
 
 ## Available versions
 
-This plugin intentionally supports only the Jasypt 1.9.3 release published from the `rahogata/jasypt` fork.
-
-Version discovery is limited to the artifacts published by that fork, and newer release tags are not included in the plugin’s supported set.
+This plugin discovers the stable Jasypt release tags published by the `rahogata/jasypt` fork. Available versions are whatever published `jasypt-*` tags are present in that repository, so the plugin follows the released stable versions instead of restricting itself to a single version.
 
 ## Development
 
@@ -77,7 +73,7 @@ mise run ci
 
 ## Notes
 
-The plugin wraps the Jasypt 1.9.3 distribution published from the `rahogata/jasypt` fork and exposes the CLI through `mise` so you can manage the supported version cleanly in the same environment.
+The plugin wraps the Jasypt distribution published from the `rahogata/jasypt` fork and exposes the CLI through `mise` so you can manage published stable versions cleanly in the same environment.
 
 ## License
 
