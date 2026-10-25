@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 #MISE description="Run plugin tests - install and execute tool"
 set -euo pipefail
 

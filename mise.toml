@@ -33,4 +33,9 @@ run = "podman compose build"
 [tasks.cl]
 description = "Login to the container"
 dir = "docker"
-run = "podman compose run --rm mise"
+run = "podman compose run --rm local"
+
+[tasks.ct]
+description = "Run test in container"
+dir = "docker"
+run = "podman compose run --rm local mise run test"

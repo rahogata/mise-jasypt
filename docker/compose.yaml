@@ -1,5 +1,5 @@
 services:
-  mise:
+  local:
     build:
       context: ..
       dockerfile: docker/Dockerfile

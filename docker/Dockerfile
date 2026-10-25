@@ -1,7 +1,6 @@
 FROM alpine:3.22
 
 RUN apk add --no-cache \
-    bash \
     ca-certificates \
     curl \
     git \
@@ -13,4 +12,4 @@ RUN apk add --no-cache \
 
 WORKDIR /workspace
 
-CMD ["/bin/bash"]
+CMD ["/bin/sh"]
