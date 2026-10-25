@@ -3,8 +3,8 @@
 set -euo pipefail
 
 mise plugin link --force jasypt .
-mise cache clear jasypt
-mise ls-remote jasypt
+mise cache clear
+mise ls-remote --minimum-release-age 0s jasypt
 mise install jasypt@1.9.3
 
 # Capture and display the output while also verifying it

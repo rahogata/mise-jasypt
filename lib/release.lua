@@ -84,7 +84,6 @@ function M.get_install_info(version)
     if not sha256 or #sha256 ~= 64 then
         error("Invalid SHA-256 checksum for " .. asset_name)
     end
-
     return {
         version = version,
         url = asset_url,
