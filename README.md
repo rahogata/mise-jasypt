@@ -42,11 +42,18 @@ After installation, use the Jasypt CLI as normal:
 ```bash
 jasypt --help
 jasypt --version
-jasypt encrypt input="hello"
-jasypt decrypt input="ENC(...)"
+
+# Encrypt a value with a password and capture the raw ciphertext emitted by Jasypt.
+jasypt encrypt input="hello" password="secret"
+
+# Decrypt the raw ciphertext returned by the previous command.
+jasypt decrypt input="<raw-ciphertext-from-encrypt-output>" password="secret"
+
 jasypt digest input="hello"
 jasypt list-algorithms
 ```
+
+The `decrypt` command expects the raw ciphertext value produced by `encrypt`, not a wrapped `ENC(...)` string. In other words, the value passed to `input=` should be the exact output from the `encrypt` command's `----OUTPUT` section.
 
 ## Available versions
 
