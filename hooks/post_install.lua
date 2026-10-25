@@ -1,4 +1,3 @@
--- hooks/post_install.lua
 local file = require("file")
 
 local function write_file(path, content)
@@ -29,10 +28,7 @@ local function create_directory(path)
         command = 'mkdir -p "' .. path .. '"'
     end
 
-    local ok = os.execute(command)
-    if not ok then
-        error("Failed to create directory: " .. path)
-    end
+    return os.execute(command)
 end
 
 function PLUGIN:PostInstall(ctx)
@@ -119,8 +115,8 @@ exec sh "$script_path" "$@"
 setlocal
 
 if not defined JASYPT_HOME (
-    echo Error: JASYPT_HOME is not set. Run this command through mise. 1>&2
-    exit /b 1
+echo Error: JASYPT_HOME is not set. Run this command through mise. 1>&2
+exit /b 1
 )
 
 if "%~1"=="" goto usage
@@ -135,35 +131,29 @@ if /i "%jasypt_command%"=="-h" goto usage_ok
 if /i "%jasypt_command%"=="help" goto usage_ok
 
 set "jasypt_script="
-if /i "%jasypt_command%"=="encrypt" set "jasypt_script=encrypt.sh"
-if /i "%jasypt_command%"=="decrypt" set "jasypt_script=decrypt.sh"
-if /i "%jasypt_command%"=="digest" set "jasypt_script=digest.sh"
-if /i "%jasypt_command%"=="list-algorithms" set "jasypt_script=listAlgorithms.sh"
+if /i "%jasypt_command%"=="encrypt" set "jasypt_script=encrypt.bat"
+if /i "%jasypt_command%"=="decrypt" set "jasypt_script=decrypt.bat"
+if /i "%jasypt_command%"=="digest" set "jasypt_script=digest.bat"
+if /i "%jasypt_command%"=="list-algorithms" set "jasypt_script=listAlgorithms.bat"
 
 if not defined jasypt_script (
-    echo Error: Unknown command "%jasypt_command%". 1>&2
-    goto usage
+echo Error: Unknown command "%jasypt_command%". 1>&2
+goto usage
 )
 
 if not exist "%JASYPT_HOME%\bin\%jasypt_script%" (
-    echo Error: Jasypt script not found: "%JASYPT_HOME%\bin\%jasypt_script%" 1>&2
-    exit /b 1
+echo Error: Jasypt script not found: "%JASYPT_HOME%\bin\%jasypt_script%" 1>&2
+echo Check the layout of the installed Jasypt distribution. 1>&2
+exit /b 1
 )
 
-where sh.exe >nul 2>nul
-if errorlevel 1 (
-    echo Error: sh.exe is required to run Jasypt scripts on Windows. 1>&2
-    echo Install Git for Windows and ensure its usr\bin directory is on PATH. 1>&2
-    exit /b 1
-)
-
-sh.exe "%JASYPT_HOME%\bin\%jasypt_script%" %*
+call "%JASYPT_HOME%\bin\%jasypt_script%" %*
 exit /b %ERRORLEVEL%
 
 :version
 if not defined JASYPT_VERSION (
-    echo Error: JASYPT_VERSION is not set. 1>&2
-    exit /b 1
+echo Error: JASYPT_VERSION is not set. 1>&2
+exit /b 1
 )
 echo jasypt@%JASYPT_VERSION%
 exit /b 0
@@ -188,9 +178,18 @@ exit /b 2
 ]=]
 
     -- Create the wrapper directory.
-    local ok, err = create_directory(wrapper_dir)
-    if ok == false then
-        error("Unable to create wrapper directory: " .. tostring(err))
+    local ok, err, code = create_directory(wrapper_dir)
+
+    if ok ~= true and ok ~= 0 then
+        error(
+            "Unable to create wrapper directory: "
+                .. wrapper_dir
+                .. " ("
+                .. tostring(err)
+                .. ", exit code "
+                .. tostring(code)
+                .. ")"
+        )
     end
 
     if is_windows then

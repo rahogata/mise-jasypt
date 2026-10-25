@@ -1,23 +1,124 @@
 #!/usr/bin/env sh
-#MISE description="Run plugin tests - install and execute tool"
+#MISE description="Run plugin tests - install and test all Jasypt commands"
 set -eu
 
 jasypt_version="1.9.3"
+plugin_dir="$(pwd -P)"
 
-mise plugin link --force jasypt .
-mise cache clear
-mise ls-remote --minimum-release-age 0s jasypt
+# Isolate mise configuration, plugins, and cache.
+test_dir="$(mktemp -d)"
+trap 'rm -rf "$test_dir"' EXIT
+trap 'exit 1' HUP INT TERM
+
+export MISE_CONFIG_DIR="$test_dir/config"
+export MISE_SYSTEM_CONFIG_DIR="$test_dir/system"
+export MISE_GLOBAL_CONFIG_FILE="$test_dir/global.toml"
+export MISE_DATA_DIR="$test_dir/data"
+export MISE_CACHE_DIR="$test_dir/cache"
+export MISE_STATE_DIR="$test_dir/state"
+export MISE_ENV_CACHE=0
+export MISE_YES=1
+
+mkdir -p "$test_dir/project"
+cd "$test_dir/project"
+
+# Generate a fresh random password without OpenSSL.
+test_password="$(od -An -N32 -tx1 /dev/urandom | tr -d ' \n')"
+
+if [ -z "$test_password" ]; then
+    echo "✗ Failed to generate test password" >&2
+    exit 1
+fi
+
+# Link the working tree only inside this temporary mise environment.
+mise plugin link jasypt "$plugin_dir"
+
+# 1. Assert supported version discovery.
+versions=$(mise ls-remote --minimum-release-age 0s jasypt)
+printf '%s\n' "$versions"
+
+if ! printf '%s\n' "$versions" | grep -Fxq "$jasypt_version"; then
+    echo "✗ Supported versions: expected $jasypt_version in version list" >&2
+    exit 1
+fi
+echo "✓ Supported versions"
+
+# 2. Install the fixed version.
 mise install "jasypt@$jasypt_version"
 
-output=$(mise exec "jasypt@$jasypt_version" -- jasypt --version)
-echo "jasypt output: $output"
+run_jasypt() {
+    mise exec "jasypt@$jasypt_version" -- jasypt "$@"
+}
 
-case "$output" in
-    *"jasypt@$jasypt_version"*)
-        echo "✓ Tests passed"
-        ;;
-    *)
-        echo "✗ Test failed: expected version jasypt@$jasypt_version" >&2
-        exit 1
-        ;;
-esac
+assert_contains() {
+    description=$1
+    actual=$2
+    expected=$3
+
+    case "$actual" in
+        *"$expected"*)
+            echo "✓ $description"
+            ;;
+        *)
+            echo "✗ $description: expected output to contain '$expected'" >&2
+            echo "Actual output: $actual" >&2
+            exit 1
+            ;;
+    esac
+}
+
+# Extract the last non-empty line from the OUTPUT section.
+extract_output() {
+    printf '%s\n' "$1" |
+        sed -n '/----OUTPUT/,$p' |
+        tail -n +2 |
+        tr -d '\r' |
+        sed '/^[[:space:]]*$/d' |
+        tail -n 1
+}
+
+# 3. Version
+output=$(run_jasypt --version)
+assert_contains "Version" "$output" "jasypt@$jasypt_version"
+
+# 4. Encrypt
+plaintext="mise-plugin-test"
+output=$(run_jasypt encrypt \
+    "input=$plaintext" \
+    "password=$test_password")
+
+encrypted=$(extract_output "$output")
+
+if [ -z "$encrypted" ]; then
+    echo "✗ Encrypt: could not extract ciphertext" >&2
+    echo "Actual output: $output" >&2
+    exit 1
+fi
+echo "✓ Encrypt"
+
+# 5. Decrypt using the same random password.
+output=$(run_jasypt decrypt \
+    "input=$encrypted" \
+    "password=$test_password")
+
+decrypted=$(extract_output "$output")
+assert_contains "Decrypt" "$decrypted" "$plaintext"
+
+
+# 6. Digest
+output=$(run_jasypt digest "input=$plaintext")
+
+digest=$(extract_output "$output")
+if [ -z "$digest" ]; then
+    echo "✗ Digest: empty output" >&2
+    echo "Actual output: $output" >&2
+    exit 1
+fi
+echo "✓ Digest"
+
+
+# 7. List algorithms
+output=$(run_jasypt list-algorithms)
+assert_contains "List algorithms" "$output" "PBE"
+
+echo "✓ All Jasypt plugin tests passed"
