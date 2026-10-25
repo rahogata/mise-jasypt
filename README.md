@@ -18,7 +18,7 @@ This project packages the Jasypt CLI from the maintained fork at `rahogata/jasyp
 Install the plugin:
 
 ```bash
-mise plugin install jasypt https://github.com/rahogata/mise-jasypt.git
+mise plugins install jasypt https://github.com/rahogata/mise-jasypt.git
 ```
 
 Then install a published version, for example:
@@ -34,6 +34,14 @@ mise use -g jasypt@1.9.3
 # or
 mise use jasypt@1.9.3
 ```
+
+## Plugin compatibility
+
+This plugin is intended for current stable `mise` releases and the platforms for which the upstream Jasypt distribution archive is published.
+
+- Supported platforms: Linux x86_64, Linux arm64, macOS x86_64, macOS arm64
+- External programs used: Java runtime required to execute the Jasypt CLI; no extra helper binaries are required beyond the standard `mise` and OS runtime environment
+- Oldest mise version tested: not formally pinned in CI; this plugin targets the current stable `mise` release line and should be used with a recent `mise` version
 
 ## Usage
 
@@ -53,7 +61,7 @@ jasypt digest input="hello"
 jasypt list-algorithms
 ```
 
-The `decrypt` command expects the raw ciphertext value produced by `encrypt`, not a wrapped `ENC(...)` string. In other words, the value passed to `input=` should be the exact output from the `encrypt` command's `----OUTPUT` section.
+The `decrypt` command expects the raw ciphertext value produced by `encrypt`, not a wrapped `ENC(...)` string. In other words, the value passed to `input=` should be the exact output from the encrypt command's `----OUTPUT` section.
 
 ## Available versions
 
