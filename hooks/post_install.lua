@@ -115,14 +115,13 @@ exec sh "$script_path" "$@"
 setlocal
 
 if not defined JASYPT_HOME (
-echo Error: JASYPT_HOME is not set. Run this command through mise. 1>&2
-exit /b 1
+    echo Error: JASYPT_HOME is not set. Run this command through mise. 1>&2
+    exit /b 1
 )
 
 if "%~1"=="" goto usage
 
 set "jasypt_command=%~1"
-shift
 
 if /i "%jasypt_command%"=="--version" goto version
 if /i "%jasypt_command%"=="-V" goto version
@@ -137,23 +136,23 @@ if /i "%jasypt_command%"=="digest" set "jasypt_script=digest.bat"
 if /i "%jasypt_command%"=="list-algorithms" set "jasypt_script=listAlgorithms.bat"
 
 if not defined jasypt_script (
-echo Error: Unknown command "%jasypt_command%". 1>&2
-goto usage
+    echo Error: Unknown command "%jasypt_command%". 1>&2
+    goto usage
 )
 
 if not exist "%JASYPT_HOME%\bin\%jasypt_script%" (
-echo Error: Jasypt script not found: "%JASYPT_HOME%\bin\%jasypt_script%" 1>&2
-echo Check the layout of the installed Jasypt distribution. 1>&2
-exit /b 1
+    echo Error: Jasypt script not found: "%JASYPT_HOME%\bin\%jasypt_script%" 1>&2
+    echo Check the layout of the installed Jasypt distribution. 1>&2
+    exit /b 1
 )
 
-call "%JASYPT_HOME%\bin\%jasypt_script%" %*
+call "%JASYPT_HOME%\bin\%jasypt_script%" %2 %3 %4 %5 %6 %7 %8 %9
 exit /b %ERRORLEVEL%
 
 :version
 if not defined JASYPT_VERSION (
-echo Error: JASYPT_VERSION is not set. 1>&2
-exit /b 1
+    echo Error: JASYPT_VERSION is not set. 1>&2
+    exit /b 1
 )
 echo jasypt@%JASYPT_VERSION%
 exit /b 0
