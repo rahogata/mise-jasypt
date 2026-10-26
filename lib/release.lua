@@ -24,20 +24,34 @@ local function get(url)
 end
 
 function M.list()
-    local releases = json.decode(get(M.api_url .. "/releases?per_page=100"))
     local result = {}
+    local page = 1
 
-    for _, release in ipairs(releases) do
-        if not release.draft and not release.prerelease then
-            local version = release.tag_name:match("^jasypt%-(.+)$")
+    while true do
+        local releases = json.decode(get(M.api_url .. "/releases?per_page=100&page=" .. page))
 
-            if version then
-                table.insert(result, {
-                    version = version,
-                    created_at = release.published_at,
-                })
+        if type(releases) ~= "table" or #releases == 0 then
+            break
+        end
+
+        for _, release in ipairs(releases) do
+            if not release.draft and not release.prerelease then
+                local version = release.tag_name:match("^jasypt%-(.+)$")
+
+                if version then
+                    table.insert(result, {
+                        version = version,
+                        created_at = release.published_at,
+                    })
+                end
             end
         end
+
+        if #releases < 100 then
+            break
+        end
+
+        page = page + 1
     end
 
     return result
