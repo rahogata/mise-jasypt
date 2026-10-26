@@ -35,7 +35,6 @@ mise plugin link jasypt "$plugin_dir"
 
 # 1. Assert supported version discovery.
 versions=$(mise ls-remote --minimum-release-age 0s jasypt)
-printf '%s\n' "$versions"
 
 if ! printf '%s\n' "$versions" | grep -Fxq "$jasypt_version"; then
     echo "✗ Supported versions: expected $jasypt_version in version list" >&2
@@ -53,10 +52,12 @@ case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*)
         script_ext="bat"
         script_dir="$install_dir/bin"
+        echo "✓ Selected Windows batch scripts (.bat)"
         ;;
     *)
         script_ext="sh"
         script_dir="$install_dir/bin"
+        echo "✓ Selected Unix shell scripts (.sh)"
         ;;
 esac
 
@@ -64,8 +65,10 @@ run_jasypt() {
     command_name=$1
     shift
 
+    executable="jasypt_${command_name}.${script_ext}"
+
     mise exec "jasypt@$jasypt_version" -- \
-        "jasypt_${command_name}.${script_ext}" "$@"
+        "$executable" "$@"
 }
 
 assert_contains() {
@@ -102,7 +105,6 @@ for command_name in encrypt decrypt digest listAlgorithms; do
     if [ ! -f "$script_dir/$executable" ]; then
         echo "✗ Command file missing: $script_dir/$executable" >&2
         echo "Installation directory: $install_dir" >&2
-        echo "Expected script directory: $script_dir" >&2
         echo "Installed files:" >&2
         find "$install_dir" -maxdepth 3 -type f >&2
         exit 1
