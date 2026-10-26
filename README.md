@@ -39,8 +39,9 @@ mise use jasypt@1.9.3
 
 This plugin is intended for current stable `mise` releases and the platforms for which the upstream Jasypt distribution archive is published.
 
-- Supported platforms: Linux x86_64, Linux arm64, macOS x86_64, macOS arm64
-- External programs used: Java runtime required to execute the Jasypt CLI; no extra helper binaries are required beyond the standard `mise` and OS runtime environment
+- Supported platforms: Linux x86_64, Linux arm64, macOS x86_64, macOS arm64, Windows x86_64
+- Windows support is officially supported and validated in CI (`windows-latest`)
+- External programs used: Java runtime required to execute the Jasypt CLI; on Windows, install a JRE or JDK that is available on `PATH` so the generated `.bat` wrapper can launch the bundled Jasypt scripts; no extra helper binaries are required beyond the standard `mise` and OS runtime environment
 - Oldest mise version tested: not formally pinned in CI; this plugin targets the current stable `mise` release line and should be used with a recent `mise` version
 
 ## Usage
