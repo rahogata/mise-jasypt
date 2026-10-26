@@ -28,15 +28,24 @@ function M.list()
     local page = 1
 
     while true do
-        local releases = json.decode(get(M.api_url .. "/releases?per_page=100&page=" .. page))
+        local body = get(M.api_url .. "/releases?per_page=100&page=" .. page)
+        local releases = json.decode(body)
 
-        if type(releases) ~= "table" or #releases == 0 then
+        if type(releases) ~= "table" then
+            error("Invalid GitHub releases API response: expected an array")
+        end
+
+        if next(releases) ~= nil and releases.message then
+            error("GitHub releases API error: " .. tostring(releases.message))
+        end
+
+        if #releases == 0 then
             break
         end
 
         for _, release in ipairs(releases) do
             if not release.draft and not release.prerelease then
-                local version = release.tag_name:match("^jasypt%-(.+)$")
+                local version = release.tag_name:match("^jasypt%-(%d+%.%d+%.%d+)$")
 
                 if version then
                     table.insert(result, {
