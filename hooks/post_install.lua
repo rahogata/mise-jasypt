@@ -61,7 +61,7 @@ Options:
 
 Examples:
   jasypt encrypt input="hello"
-  jasypt decrypt input="ENC(...)"
+  jasypt decrypt input="<raw-ciphertext-from-encrypt-output>"
   jasypt digest input="hello"
   jasypt list-algorithms
 EOF
