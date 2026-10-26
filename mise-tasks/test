@@ -46,10 +46,26 @@ echo "✓ Supported versions"
 # 2. Install the fixed version.
 mise install "jasypt@$jasypt_version"
 
+install_dir="$(mise where "jasypt@$jasypt_version")"
+
+# Determine the script extension and directory for the current OS.
+case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+        script_ext="bat"
+        script_dir="$install_dir/bin"
+        ;;
+    *)
+        script_ext="sh"
+        script_dir="$install_dir/bin"
+        ;;
+esac
+
 run_jasypt() {
     command_name=$1
     shift
-    mise exec "jasypt@$jasypt_version" -- "jasypt_$command_name" "$@"
+
+    mise exec "jasypt@$jasypt_version" -- \
+        "jasypt_${command_name}.${script_ext}" "$@"
 }
 
 assert_contains() {
@@ -79,36 +95,22 @@ extract_output() {
         tail -n 1
 }
 
-
-# Determine the script extension for the current OS.
-case "$(uname -s)" in
-    MINGW*|MSYS*|CYGWIN*)
-        script_ext="bat"
-        ;;
-    *)
-        script_ext="sh"
-        ;;
-esac
-
-run_jasypt() {
-    command_name=$1
-    shift
-    mise exec "jasypt@$jasypt_version" -- "jasypt_${command_name}.${script_ext}" "$@"
-}
-
-# 3. Verify the prefixed commands are available.
+# 3. Verify the prefixed command files exist.
 for command_name in encrypt decrypt digest listAlgorithms; do
     executable="jasypt_${command_name}.${script_ext}"
 
-    if ! mise exec "jasypt@$jasypt_version" -- sh -c \
-        'command -v "$1" >/dev/null 2>&1' sh "$executable"; then
-        echo "✗ Command not available: $executable" >&2
+    if [ ! -f "$script_dir/$executable" ]; then
+        echo "✗ Command file missing: $script_dir/$executable" >&2
+        echo "Installation directory: $install_dir" >&2
+        echo "Expected script directory: $script_dir" >&2
+        echo "Installed files:" >&2
+        find "$install_dir" -maxdepth 3 -type f >&2
         exit 1
     fi
 done
-echo "✓ Prefixed commands available"
+echo "✓ Prefixed command files exist"
 
-# 4. Encrypt
+# 4. Encrypt.
 plaintext="mise-plugin-test"
 output=$(run_jasypt encrypt \
     "input=$plaintext" \
@@ -131,7 +133,7 @@ output=$(run_jasypt decrypt \
 decrypted=$(extract_output "$output")
 assert_contains "Decrypt" "$decrypted" "$plaintext"
 
-# 6. Digest
+# 6. Digest.
 output=$(run_jasypt digest "input=$plaintext")
 
 digest=$(extract_output "$output")
@@ -142,7 +144,7 @@ if [ -z "$digest" ]; then
 fi
 echo "✓ Digest"
 
-# 7. List algorithms
+# 7. List algorithms.
 output=$(run_jasypt listAlgorithms)
 assert_contains "List algorithms" "$output" "PBE"
 
