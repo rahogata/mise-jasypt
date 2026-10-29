@@ -270,4 +270,51 @@ else
     echo "✓ Unsupported version rejected"
 fi
 
+# 9. Verify mise rejects an archive with an incorrect SHA-256 checksum.
+#
+# Use a separate copy of the plugin and isolated mise directories so this
+# test cannot affect the normal installation or its cache.
+checksum_plugin_dir="$test_dir/checksum-plugin"
+cp -R "$plugin_dir" "$checksum_plugin_dir"
+
+# Deliberately return an incorrect checksum while preserving the real URL.
+cat >"$checksum_plugin_dir/hooks/pre_install.lua" <<'LUA'
+local release = require("release")
+
+function PLUGIN:PreInstall(ctx)
+    local info = release.get_install_info(ctx.version)
+    info.sha256 = string.rep("0", 64)
+    return info
+end
+LUA
+
+# Isolate this test from the normal plugin installation and cache.
+export MISE_CONFIG_DIR="$test_dir/checksum-config"
+export MISE_SYSTEM_CONFIG_DIR="$test_dir/checksum-system"
+export MISE_GLOBAL_CONFIG_FILE="$test_dir/checksum-global.toml"
+export MISE_DATA_DIR="$test_dir/checksum-data"
+export MISE_CACHE_DIR="$test_dir/checksum-cache"
+export MISE_STATE_DIR="$test_dir/checksum-state"
+
+mkdir -p "$MISE_CONFIG_DIR" "$MISE_DATA_DIR" "$MISE_CACHE_DIR"
+
+mise plugin link jasypt "$checksum_plugin_dir"
+
+if output="$(mise install "jasypt@$jasypt_version" 2>&1)"; then
+    echo "✗ Checksum: mise accepted an archive with an incorrect SHA-256" >&2
+    echo "$output" >&2
+    exit 1
+fi
+
+case "$output" in
+    *checksum*|*Checksum*|*SHA-256*|*sha256*|*hash*)
+        echo "✓ Checksum: mise rejects an archive with an incorrect SHA-256"
+        ;;
+    *)
+        echo "✗ Checksum: installation failed, but not clearly because of checksum verification" >&2
+        echo "$output" >&2
+        exit 1
+        ;;
+esac
+
 echo "✓ All Jasypt plugin tests passed"

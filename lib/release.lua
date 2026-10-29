@@ -66,9 +66,52 @@ function M.list()
     return result
 end
 
+local function validate_version(version)
+    if type(version) ~= "string" then
+        error("Invalid version: expected a string, got " .. type(version), 0)
+    end
+
+    if version == "" then
+        error("Invalid version: version cannot be empty", 0)
+    end
+
+    if not version:match("^%d+%.%d+%.%d+$") then
+        error("Unsupported Jasypt version format: " .. version .. " (expected e.g. 1.9.3)", 0)
+    end
+
+    return version
+end
+
 function M.get_release(version)
+    version = validate_version(version)
     local tag = "jasypt-" .. version
-    local release = json.decode(get(M.api_url .. "/releases/tags/" .. tag))
+
+    local body = get(M.api_url .. "/releases/tags/" .. tag)
+    local release = json.decode(body)
+
+    if type(release) ~= "table" then
+        error("Invalid release metadata for " .. tag .. ": expected a JSON object", 0)
+    end
+
+    if release.message then
+        error("GitHub release API error for " .. tag .. ": " .. tostring(release.message), 0)
+    end
+
+    if type(release.tag_name) ~= "string" then
+        error("Invalid release metadata for " .. tag .. ": missing tag_name", 0)
+    end
+
+    if release.tag_name ~= tag then
+        error("Invalid release metadata for " .. tag .. ": tag_name mismatch", 0)
+    end
+
+    if type(release.assets) ~= "table" then
+        error("Invalid release metadata for " .. tag .. ": assets is missing or not a list", 0)
+    end
+
+    if release.draft == nil or release.prerelease == nil then
+        error("Invalid release metadata for " .. tag .. ": missing draft/prerelease flags", 0)
+    end
 
     if release.draft or release.prerelease then
         error("Jasypt release is not a published stable release: " .. tag)
