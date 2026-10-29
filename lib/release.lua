@@ -145,10 +145,10 @@ function M.get_install_info(version)
     end
 
     local checksum_body = get(checksum_url)
-    local sha256 = checksum_body:match("^%s*(%x+)")
+    local sha256, filename = checksum_body:match("^([%x]+)  ([^\r\n]+)\r?\n?$")
 
-    if not sha256 or #sha256 ~= 64 then
-        error("Invalid SHA-256 checksum for " .. asset_name)
+    if not sha256 or #sha256 ~= 64 or filename ~= asset_name then
+        error("Invalid SHA-256 checksum file for " .. asset_name)
     end
     return {
         version = version,
