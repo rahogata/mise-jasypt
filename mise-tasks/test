@@ -224,8 +224,6 @@ echo "✓ Digest"
 output="$(run_jasypt listAlgorithms)"
 assert_contains "List algorithms" "$output" "PBE"
 
-echo "✓ All Jasypt plugin tests passed"
-
 # 8. Negative scenarios.
 
 # Encrypt without required arguments.
