@@ -50,11 +50,11 @@ install_dir="$(mise where "jasypt@$jasypt_version")"
 # 3. Determine the expected platform-specific command extension.
 case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*)
-        script_ext="bat"
+        script_ext=".bat"
         platform="Windows"
         ;;
     *)
-        script_ext="sh"
+        script_ext=""
         platform="Unix"
         ;;
 esac
@@ -70,7 +70,7 @@ if [ ! -d "$script_dir" ]; then
 fi
 
 for command_name in encrypt decrypt digest listAlgorithms; do
-    executable="jasypt_${command_name}.${script_ext}"
+    executable="jasypt_${command_name}${script_ext}"
     expected_path="$script_dir/$executable"
 
     if [ ! -f "$expected_path" ]; then
@@ -89,7 +89,7 @@ run_jasypt() {
     command_name=$1
     shift
 
-    executable="jasypt_${command_name}.${script_ext}"
+    executable="jasypt_${command_name}${script_ext}"
 
     mise exec "jasypt@$jasypt_version" -- "$executable" "$@"
 }

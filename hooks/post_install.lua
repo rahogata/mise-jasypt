@@ -19,11 +19,20 @@ local function list_directory(dir)
 end
 
 local function rename_scripts(bin_dir)
+    local is_windows = RUNTIME.osType == "windows"
+    local extension = is_windows and "%.bat$" or "%.sh$"
+
     for _, path in ipairs(list_directory(bin_dir)) do
         local name = get_filename(path)
 
-        if name and (name:match("%.bat$") or name:match("%.sh$")) and not name:match("^jasypt_") then
-            local new_path = file.join_path(bin_dir, "jasypt_" .. name)
+        if name and name:match(extension) and not name:match("^jasypt_") then
+            local new_name = "jasypt_" .. name
+
+            if not is_windows then
+                new_name = new_name:gsub("%.sh$", "")
+            end
+
+            local new_path = file.join_path(bin_dir, new_name)
 
             local exists_ok, destination_exists = pcall(file.exists, new_path)
             if not exists_ok then
@@ -59,7 +68,7 @@ local function make_scripts_executable(bin_dir)
     for _, path in ipairs(list_directory(bin_dir)) do
         local name = get_filename(path)
 
-        if name and name:match("^jasypt_.*%.sh$") then
+        if name and name:match("^jasypt_") then
             local quoted_path = "'" .. path:gsub("'", "'\\''") .. "'"
             local ok, reason, code = os.execute("chmod u+x " .. quoted_path)
 
@@ -91,12 +100,6 @@ function PLUGIN:PostInstall(ctx)
         error("[mise-jasypt] Script directory does not exist: '" .. bin_dir .. "'", 0)
     end
 
-    local ok, err = pcall(function()
-        rename_scripts(bin_dir)
-        make_scripts_executable(bin_dir)
-    end)
-
-    if not ok then
-        error(tostring(err), 0)
-    end
+    rename_scripts(bin_dir)
+    make_scripts_executable(bin_dir)
 end

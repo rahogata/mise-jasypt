@@ -1,5 +1,5 @@
 services:
-  local:
+  mise-jasypt:
     build:
       context: ..
       dockerfile: docker/Dockerfile

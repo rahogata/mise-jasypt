@@ -25,7 +25,7 @@ run = "hk fix"
 description = "Run all CI checks"
 depends = ["lint", "test"]
 
-[tasks.build-docker]
+[tasks.bd]
 description = "Build docker image"
 dir = "docker"
 run = "podman compose build"
@@ -33,9 +33,9 @@ run = "podman compose build"
 [tasks.cl]
 description = "Login to the container"
 dir = "docker"
-run = "podman compose run --rm local"
+run = "podman compose run --rm mise-jasypt"
 
 [tasks.ct]
 description = "Run test in container"
 dir = "docker"
-run = "podman compose run --rm local mise run test"
+run = "podman compose run --rm mise-jasypt mise run test"
